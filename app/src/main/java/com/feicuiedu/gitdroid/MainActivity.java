@@ -17,6 +17,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import com.feicuiedu.gitdroid.commons.ActivityUtils;
+import com.feicuiedu.gitdroid.fragment.HotRepoFragment;
 import com.feicuiedu.gitdroid.login.LoginActivity;
 
 import junit.framework.Protectable;
@@ -36,6 +38,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Button mBtnLogin;
     private ImageView mIvIcon;
 
+    private ActivityUtils mActivityUtils;
+    //要切换的Fragment
+    private HotRepoFragment mHotRepoFragment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,7 +55,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void onContentChanged() {
         super.onContentChanged();
         ButterKnife.bind(this);
-
         /**
          * 需要处理的视图
          * 1. toolbar
@@ -58,26 +63,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
          */
         //设置Action
         setSupportActionBar(mToolbar);
+
         // 设置监听
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        //同步当前状态
         toggle.syncState();
-
-        //设置DrawerLayout的监听
+        //设置DrawerLayout侧滑的监听
         mDrawerLayout.addDrawerListener(toggle);
+
 
         //mNavigationView中子条目设置监听事件
         mNavigationView.setNavigationItemSelectedListener(this);
 
+        //头布局
         mBtnLogin = ButterKnife.findById(mNavigationView.getHeaderView(0), R.id.btnLogin);
         mIvIcon = ButterKnife.findById(mNavigationView.getHeaderView(0), R.id.ivIcon);
         mBtnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // TODO: 2016/12/1 0001 跳转到登录界面
+                //mActivityUtils.startActivity(LoginActivity.class);
                 startActivity(new Intent(MainActivity.this, LoginActivity.class));
                 finish();
             }
         });
+
+        // 在主页面，默认显示的是热门仓库Fragment
+//        mHotRepoFragment=new HotRepoFragment();
+//        replaceFragment(mHotRepoFragment);
 
     }
 
@@ -95,11 +108,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onStart() {
         super.onStart();
+        // TODO: 2016/12/1 0001 展示登录用户的信息
     }
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // TODO: 2016/12/1 0001
+        //是否为选择状态
         if (item.isChecked()) {
             item.setCheckable(false);
         }
@@ -117,9 +132,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.tips_daily:
                 break;
         }
-        //选择一项之后，切换Fragment,关闭抽屉
+        //选择一项之后，切换Fragment并关闭抽屉
         mDrawerLayout.closeDrawer(GravityCompat.START);
 
+        //表示已经被处理
         return true;
     }
 
@@ -127,7 +143,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onBackPressed() {
         if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
-            //  mDrawerLayout.
+            mDrawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
         }
     }
 }
